@@ -3,19 +3,37 @@ kind: Deployment
 metadata:
   name: hello-web
   labels:
-    app: hello-web
+    app.kubernetes.io/name: hello-web
+    app.kubernetes.io/part-of: hello-k8s
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hello-web
+      app: hello-web   # behold opprinnelig selector (immutable)
   template:
     metadata:
       labels:
         app: hello-web
+        app.kubernetes.io/name: hello-web
+        app.kubernetes.io/part-of: hello-k8s
     spec:
       containers:
         - name: nginx
           image: nginx:stable
           ports:
             - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet: { path: "/", port: 80 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet: { path: "/", port: 80 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
